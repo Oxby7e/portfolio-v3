@@ -19,6 +19,9 @@ export const metadata: Metadata = {
     title: "Ayan Modak | Software Engineer",
     description: "Software Engineer specializing in building scalable, high-performance web applications and cross platform app.",
   },
+  other: {
+    "google-site-verification": "hJ_Lh6_YxS52LqV5Q1C9t1zJ-P_b-t1k-K_a-c_k",
+  },
 };
 
 export default function RootLayout({
