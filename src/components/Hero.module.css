@@ -1,0 +1,139 @@
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 4rem 0;
+  text-align: center;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+}
+
+.greeting {
+  font-size: 1.25rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.title {
+  font-size: 5.5rem;
+  font-weight: 800;
+  color: var(--foreground);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.04em;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.logo {
+  width: 90px;
+  height: auto;
+  object-fit: contain;
+}
+
+.titleName {
+  margin-left: -18px;
+}
+
+@media (max-width: 640px) {
+  .title {
+    font-size: 2.5rem;
+  }
+}
+
+.subtext {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin-bottom: 3rem;
+  max-width: 600px;
+}
+
+.chatContainer {
+  width: 100%;
+  max-width: 700px;
+  margin-bottom: 2rem;
+}
+
+.chatInputWrapper {
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.chatInputWrapper:focus-within {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chatInput {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.125rem;
+  resize: none;
+  outline: none;
+  padding-right: 4rem;
+}
+
+.sendButton {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--foreground);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.sendButton:hover {
+  background: #3f3f46;
+  transform: scale(1.05);
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  max-width: 800px;
+}
+
+.suggestionPill {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+.suggestionPill:hover {
+  color: var(--foreground);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+}

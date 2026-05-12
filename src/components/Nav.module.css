@@ -1,0 +1,89 @@
+.nav {
+  position: sticky;
+  top: 1.5rem;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
+  margin-top: 1.5rem;
+  pointer-events: none;
+}
+
+.container {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.5rem 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+}
+
+.list {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  padding-right: 1.5rem;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 0.5rem 0.75rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.link:hover {
+  color: var(--foreground);
+  opacity: 1;
+}
+
+.active {
+  color: var(--foreground);
+}
+
+.scheduleBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--foreground);
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.scheduleBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--muted);
+}
+
+.resumeBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--background);
+  padding: 0.5rem 1rem;
+  background: var(--foreground);
+  border-radius: 9999px;
+  transition: opacity 0.2s ease;
+}
+
+.resumeBtn:hover {
+  opacity: 0.9;
+}

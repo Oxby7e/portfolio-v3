@@ -1,0 +1,256 @@
+.about {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6rem 0;
+  text-align: center;
+  background: transparent;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  margin-bottom: 2rem;
+}
+
+.name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin-bottom: 1rem;
+}
+
+.meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  margin-bottom: 2rem;
+}
+
+.bio {
+  font-size: 1rem;
+  color: var(--muted);
+  max-width: 800px;
+  line-height: 1.6;
+  margin-bottom: 4rem;
+  font-family: var(--font-mono);
+}
+
+.languages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.languageCard {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  text-align: left;
+}
+
+.flag {
+  font-size: 1.5rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.langInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.langName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.langLevel {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+/* Timeline Section */
+.timelineSection {
+  margin-top: 6rem;
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  position: relative;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 186px; /* Exactly aligned with dots */
+  top: 50px;
+  bottom: 50px;
+  width: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.2) 10%, rgba(255,255,255,0.2) 90%, transparent);
+}
+
+.timelineItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.itemHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.itemLabel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: #18181b;
+  border: 1px solid var(--border);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.itemEntryText {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+  margin-bottom: 1.5rem;
+  font-family: var(--font-mono);
+}
+
+.itemMain {
+  display: flex;
+  width: 100%;
+  gap: 2rem;
+  align-items: center;
+}
+
+.itemTimeline {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  min-width: 180px;
+  justify-content: flex-end;
+}
+
+.itemDateSide {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  text-transform: lowercase;
+}
+
+.itemDot {
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(255,255,255,0.6);
+  flex-shrink: 0;
+  z-index: 2;
+  border: 3px solid #000;
+}
+
+.itemCard {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  text-align: left;
+}
+
+.itemLogo {
+  width: 80px;
+  height: 80px;
+  background: #18181b;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.logoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 0.5rem;
+}
+
+.placeholderLogo {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.itemTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.itemSubtitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.itemLocation, .itemPeriod {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+.itemLinks {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.linkIcon {
+  font-size: 0.9rem;
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.linkIcon:hover {
+  opacity: 1;
+}
