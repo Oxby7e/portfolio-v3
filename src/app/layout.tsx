@@ -5,6 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://portfolio-v3-phi-virid.vercel.app"),
   title: "Ayan Modak | Software Engineer",
   description: "Software Engineer specializing in building scalable, high-performance web applications and cross platform app.",
   keywords: ["Software Engineer", "React", "Next.js", "Node.js", "Full Stack Developer", "Ayan Modak"],
