@@ -71,7 +71,7 @@ export default function Achievements() {
             >
               <div className={styles.cardHeader}>
                 <div className={styles.iconWrapper}>
-                  {React.cloneElement(item.icon as React.ReactElement, { size: 24 })}
+                  {React.cloneElement(item.icon as React.ReactElement<any>, { size: 24 })}
                 </div>
                 <span className={styles.date}>{item.date}</span>
               </div>

@@ -26,7 +26,7 @@ export default function Home() {
         <Skills />
       </Section>
       
-      <Achievements />
+      {/* <Achievements /> */}
 
       <Section id="projects">
         <Projects />

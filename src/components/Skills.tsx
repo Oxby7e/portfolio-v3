@@ -71,7 +71,7 @@ export default function Skills() {
           >
             <div className={styles.iconWrapper}>
               {/* Injecting class to the icon component */}
-              {React.cloneElement(skill.icon as React.ReactElement, { 
+              {React.cloneElement(skill.icon as React.ReactElement<any>, { 
                 className: styles.icon,
                 size: 40,
                 strokeWidth: 1.5
