@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     description: "Software Engineer specializing in building scalable, high-performance web applications and cross platform app.",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ayan Modak | Software Engineer",
+    description: "Software Engineer specializing in building scalable, high-performance web applications and cross platform app.",
+  },
 };
 
 export default function RootLayout({
