@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRef, useState } from "react";
 import styles from "./Projects.module.css";
 import { ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
@@ -127,10 +127,10 @@ export default function Projects() {
           </h2>
         </div>
         <div className={styles.navButtons}>
-          <button className={styles.navButton} onClick={() => scroll("left")}>
+          <button className={styles.navButton} onClick={() => scroll("left")} aria-label="Scroll projects left">
             <ChevronLeft size={20} />
           </button>
-          <button className={styles.navButton} onClick={() => scroll("right")}>
+          <button className={styles.navButton} onClick={() => scroll("right")} aria-label="Scroll projects right">
             <ChevronRight size={20} />
           </button>
         </div>
@@ -149,79 +149,124 @@ export default function Projects() {
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
   const [isHovered, setIsHovered] = useState(false);
+  const accentClass = styles[`accent${(index % 4) + 1}`];
+  const primaryTags = project.tags.slice(0, 4);
+  const extraTags = Math.max(project.tags.length - primaryTags.length, 0);
 
   return (
-    <motion.div
-      className={`${styles.projectCard} ${project.highlight ? styles.highlightCard : ""}`}
-      initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.1 }}
+    <div
+      className={`${styles.projectCard} ${project.highlight ? styles.highlightCard : ""} ${accentClass}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className={styles.cardVisual}>
-        <div className={styles.imageOverlay} />
-        
-        <AnimatePresence>
-          {isHovered && (
-            <motion.div 
-              className={styles.hoverOverlay}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <motion.div 
-                className={styles.hoverContent}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 20, opacity: 0 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                <div className={styles.viewInfo}>View Project Details</div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <motion.div
+        className={styles.cardInner}
+        initial={{ opacity: 0, scale: 0.96 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.55, delay: index * 0.08 }}
+        animate={{ rotateY: isHovered ? 180 : 0 }}
+      >
+        <div className={styles.cardFaceFront}>
+          <div className={styles.cardVisual}>
+            <div className={styles.visualBackdrop} />
+            <div className={styles.imageOverlay} />
 
-        <div className={styles.cardBrand}>
-          <span className={styles.cardIcon}>{project.icon}</span>
-          <span className={styles.cardBadge}>{project.badge}</span>
-        </div>
-      </div>
+            <div className={styles.previewFrame}>
+              <div className={styles.previewTopRow}>
+                <span className={styles.previewYear}>{project.year ?? "Case Study"}</span>
+                <span className={styles.previewStatus}>{project.highlight ? "Featured" : "Delivery"}</span>
+              </div>
 
-      <div className={styles.cardInfo}>
-        <div className={styles.infoTop}>
-          <h3 className={styles.cardTitle}>{project.title}</h3>
-          <p className={styles.cardDescription}>{project.description}</p>
-        </div>
-        
-        <div className={styles.cardFooter}>
-          <div className={styles.tags}>
-            {project.tags.map((tag) => (
-              <span key={tag} className={styles.tag}>{tag}</span>
-            ))}
+              <div className={styles.previewCenter}>
+                <span className={styles.previewIconWrap}>
+                  <span className={styles.previewIcon}>{project.icon}</span>
+                </span>
+              </div>
+
+              <div className={styles.previewCopy}>
+                <span className={styles.previewLabel}>Project Snapshot</span>
+              </div>
+            </div>
           </div>
-          
-          <motion.button 
-            className={styles.actionButton}
-            animate={{ 
-              scale: isHovered ? 1.1 : 1,
-              backgroundColor: isHovered ? "#fff" : "rgba(255,255,255,0.05)",
-              color: isHovered ? "#000" : "#fff"
-            }}
-            transition={{ duration: 0.2 }}
-            onClick={() => project.link && window.open(project.link, "_blank")}
-          >
-            <ArrowUpRight size={22} strokeWidth={1.5} />
-          </motion.button>
+
+          <div className={styles.cardInfo}>
+            <div className={styles.cardMetaRow}>
+              <span className={styles.cardBadge}>{project.badge}</span>
+              {project.year && <span className={styles.cardYear}>{project.year}</span>}
+            </div>
+
+            <div className={styles.infoTop}>
+              <h3 className={styles.cardTitle}>{project.title}</h3>
+              <p className={styles.cardDescription}>{project.description}</p>
+            </div>
+
+            <div className={styles.cardFooter}>
+              <div className={styles.tags}>
+                {project.tags.map((tag) => (
+                  <span key={tag} className={styles.tag}>{tag}</span>
+                ))}
+              </div>
+
+              <motion.button
+                className={styles.actionButton}
+                type="button"
+                animate={{
+                  scale: isHovered ? 1.04 : 1,
+                }}
+                transition={{ duration: 0.2 }}
+                onClick={() => project.link && window.open(project.link, "_blank")}
+                aria-label={project.link ? `Open ${project.title}` : `${project.title} preview unavailable`}
+              >
+                <ArrowUpRight size={22} strokeWidth={1.5} />
+              </motion.button>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div className={styles.cardFaceBack}>
+          <div className={styles.backHeader}>
+            <span className={styles.backEyebrow}>Tech Stack</span>
+            {project.year && <span className={styles.backYear}>{project.year}</span>}
+          </div>
+
+          <div className={styles.backMain}>
+            <h3 className={styles.backTitle}>{project.title}</h3>
+            <p className={styles.backDescription}>{project.description}</p>
+          </div>
+
+          <div className={styles.backStack}>
+            {primaryTags.map((tag) => (
+              <span key={tag} className={styles.backTag}>
+                {tag}
+              </span>
+            ))}
+            {extraTags > 0 && (
+              <span className={styles.backTag}>+{extraTags} more</span>
+            )}
+          </div>
+
+          <div className={styles.backFooter}>
+            {project.link ? (
+              <a
+                href={project.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.previewLink}
+              >
+                <span>Preview Project</span>
+                <ArrowUpRight size={18} strokeWidth={1.7} />
+              </a>
+            ) : (
+              <span className={styles.previewLinkDisabled}>Preview unavailable</span>
+            )}
+          </div>
+        </div>
+      </motion.div>
 
       {project.highlight && (
         <div className={styles.startupRibbon}>STARTUP</div>
       )}
-    </motion.div>
+    </div>
   );
 }

@@ -92,7 +92,7 @@ export default function Experience() {
 
   return (
     <div ref={containerRef} className={styles.container} id="experience">
-      <div className={styles.sectionLabelCenter}>Experience & Education</div>
+      <h2 className={styles.sectionLabelCenter}>Experience & Education</h2>
 
       {/* Central Animated Line */}
       <div className={styles.timelineLineGlobal}>

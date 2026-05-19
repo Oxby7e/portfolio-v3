@@ -16,6 +16,24 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Portfolio Assistant
+
+The hero section can answer visitor questions using the OpenAI API from a
+server-side route.
+
+Create a local environment file and add:
+
+```bash
+OPENAI_API_KEY="your_openai_api_key_here"
+OPENAI_MODEL="gpt-5.2"
+OPENAI_RATE_LIMIT_MAX_REQUESTS="5"
+OPENAI_RATE_LIMIT_WINDOW_MS="60000"
+```
+
+`OPENAI_MODEL` is optional. The app defaults to `gpt-5.2` when it is not set.
+The rate-limit variables are optional. By default, the assistant allows 5
+requests per client IP per 60 seconds.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

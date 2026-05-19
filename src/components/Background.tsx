@@ -1,32 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import styles from "./Background.module.css";
 import { motion } from "framer-motion";
 
 export default function Background() {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 8 }, (_, index) => ({
+        key: index,
+        x: `${(index * 13 + 11) % 100}vw`,
+        y: `${(index * 17 + 19) % 100}vh`,
+        left: `${(index * 19 + 7) % 100}%`,
+        top: `${(index * 23 + 13) % 100}%`,
+        duration: 10 + index * 1.35,
+        delay: index * 0.6,
+      })),
+    []
+  );
 
   return (
     <div className={styles.background}>
-      {/* Deep Navy Glows */}
       <div className={styles.glow} />
-      
-      {/* Sub Grid (Finer) */}
+
       <div className={styles.subGrid} />
-      
-      {/* Primary Dashed Grid */}
+
       <div className={styles.grid} />
-      
-      {/* Static dashed lines for structure */}
+
       <div className={styles.dashedLines} />
-      
-      {/* Decorative Technical Box (from image) */}
-      <motion.div 
+
+      <motion.div
         className={styles.decorative}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -35,31 +38,30 @@ export default function Background() {
         <div className={styles.dot} />
       </motion.div>
 
-      {/* Subtle intersection dots */}
       <div className={styles.centerDot} />
 
-      {/* Floating data particles - Only render on client to avoid hydration mismatch */}
-      {isMounted && [...Array(8)].map((_, i) => (
+      {particles.map((particle) => (
         <motion.div
-          key={i}
+          key={particle.key}
           className="absolute w-[2px] h-[2px] bg-white/20 rounded-full"
-          initial={{ 
-            x: Math.random() * 100 + "vw", 
-            y: Math.random() * 100 + "vh",
-            opacity: 0 
+          initial={{
+            x: particle.x,
+            y: particle.y,
+            opacity: 0,
           }}
-          animate={{ 
+          animate={{
             opacity: [0, 0.4, 0],
             y: ["0vh", "-10vh"],
           }}
           transition={{
-            duration: Math.random() * 10 + 10,
+            duration: particle.duration,
+            delay: particle.delay,
             repeat: Infinity,
-            ease: "linear"
+            ease: "linear",
           }}
           style={{
-            left: Math.random() * 100 + "%",
-            top: Math.random() * 100 + "%",
+            left: particle.left,
+            top: particle.top,
           }}
         />
       ))}

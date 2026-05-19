@@ -33,14 +33,14 @@ const cardVariants = {
 export default function About() {
   return (
     <section className={styles.about} id="about">
-      <motion.div
+      <motion.h2
         className={styles.label}
         initial={{ opacity: 0, y: 10 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
       >
         About
-      </motion.div>
+      </motion.h2>
 
       {/* <motion.h2
         className={styles.name}
@@ -71,23 +71,31 @@ export default function About() {
         viewport={{ once: true }}
         transition={{ delay: 0.5, duration: 0.6 }}
       >
-        Hi, I&apos;m Ayan, a backend and blockchain developer with over 2.5
-        years of experience. I specialise in building robust, scalable solutions
-        and have extensive expertise in{" "}
-        <span className="text-white">supply chain optimisation</span>,{" "}
-        <span className="text-white">traceability (track and trace)</span>, and{" "}
-        <span className="text-white">tokenomics</span>. Additionally, I have
-        worked extensively on regulatory compliance and climate change
-        initiatives, as well as sustainable blockchain applications.
+        I&apos;m Ayan, a Backend and Blockchain Developer with 3+ years of
+        experience building scalable systems across blockchain, supply chain,
+        sustainability, and digital infrastructure.
         <br />
         <br />
-        Currently, I&apos;m a Back-End Engineer at{" "}
-        <span className="text-white">Emertech Innovations</span>, where I
-        contribute to the design and scale APIs and microservices that power our
-        products and integrations. I am also working on a use case called{" "}
-        <span className="text-white">Zahabi</span> (Revolutionising Gold
-        Investment with Blockchain), which aims to help finance institutions and
-        retail shops monetise their idle gold assets.
+        I specialize in backend engineering, distributed systems, blockchain
+        architecture, microservices, API development, and system design, with
+        hands-on work in traceability platforms, tokenization, QR tracking, and
+        regulatory-compliant blockchain solutions.
+        <br />
+        <br />
+        Currently, I work as a Back-End Engineer at Emertech Innovations, where
+        I design and scale APIs, backend systems, and microservices for
+        enterprise-grade products and integrations.
+        <br />
+        <br />
+        I&apos;m also building Zahabi, a blockchain-powered commodity
+        monetization platform for transparent gold investment and asset
+        utilization, and GraveLedger, a digital mapping platform modernizing
+        cemetery and graveyard management in India.
+        <br />
+        <br />
+        Beyond blockchain, I have contributed to climate-tech and sustainability
+        initiatives, including DMRV systems for carbon credits and
+        environmental impact tracking.
       </motion.p>
 
       <motion.div

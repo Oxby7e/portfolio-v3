@@ -5,7 +5,15 @@ import { motion } from "framer-motion";
 import styles from "./Achievements.module.css";
 import { Trophy, Star, Award, Zap, Target, Rocket } from "lucide-react";
 
-const achievements = [
+interface Achievement {
+  title: string;
+  description: string;
+  icon: React.ReactElement<{ size?: number }>;
+  date: string;
+  category: string;
+}
+
+const achievements: Achievement[] = [
   {
     title: "1st Runner Up - SIH 2024",
     description: "National Level Hackathon organized by Ministry of Education, Govt. of India. Developed an AI solution for predictive maintenance.",
@@ -71,7 +79,7 @@ export default function Achievements() {
             >
               <div className={styles.cardHeader}>
                 <div className={styles.iconWrapper}>
-                  {React.cloneElement(item.icon as React.ReactElement<any>, { size: 24 })}
+                  {React.cloneElement(item.icon, { size: 24 })}
                 </div>
                 <span className={styles.date}>{item.date}</span>
               </div>

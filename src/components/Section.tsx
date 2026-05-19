@@ -9,7 +9,7 @@ interface SectionProps {
 
 export default function Section({ title, children, className = "", id }: SectionProps) {
   return (
-    <section id={id} className={`py-12 ${className}`}>
+    <section id={id} className={`content-section ${className}`}>
       {title && <h2 className="section-title">{title}</h2>}
       {children}
     </section>

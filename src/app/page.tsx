@@ -5,7 +5,6 @@ import Section from "@/components/Section";
 import Experience from "@/components/Experience";
 import Skills from "@/components/Skills";
 import Projects from "@/components/Projects";
-import Achievements from "@/components/Achievements";
 import Footer from "@/components/Footer";
 import Background from "@/components/Background";
 

@@ -1,5 +1,5 @@
 .section {
-  padding: 8rem 0;
+  padding: 0;
   width: 100%;
   background: transparent;
   overflow: hidden;
@@ -9,17 +9,19 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 4rem;
-  padding: 0 4rem;
+  margin-bottom: var(--space-12);
+  padding: 0 clamp(0.5rem, 2vw, 2.5rem);
+  gap: var(--space-6);
 }
 
 .mainHeading {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4vw, 3.25rem);
   font-weight: 700;
-  line-height: 1.2;
-  color: #fff;
-  max-width: 800px;
-  letter-spacing: -0.02em;
+  line-height: var(--line-height-heading);
+  color: var(--text-primary);
+  max-width: 52rem;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
 }
 
 .navButtons {
@@ -32,33 +34,35 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  color: #fff;
+  border: 1px solid var(--border-strong);
+  background: rgba(14, 14, 17, 0.9);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
 }
 
 .navButton:hover {
-  background: #fff;
-  color: #000;
-  border-color: #fff;
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--text-primary);
+  border-color: rgba(96, 165, 250, 0.24);
 }
 
 .carouselWrapper {
   width: 100%;
-  padding-left: 4rem;
+  padding-left: clamp(0.5rem, 2vw, 2.5rem);
 }
 
 .scrollContainer {
   display: flex;
-  gap: 2.5rem;
+  gap: 1.75rem;
   overflow-x: auto;
   scroll-behavior: smooth;
   padding-bottom: 3rem;
+  scroll-snap-type: x proximity;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -70,38 +74,225 @@
 .projectCard {
   min-width: 420px;
   max-width: 420px;
-  height: 540px;
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(12px);
-  border-radius: 40px;
+  height: 580px;
+  perspective: 1600px;
+  border-radius: 2rem;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.cardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.cardFaceFront,
+.cardFaceBack {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 2rem;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  background: linear-gradient(180deg, rgba(17, 17, 20, 0.96), rgba(11, 11, 13, 0.9));
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.cardFaceFront {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardFaceBack {
+  display: flex;
+  flex-direction: column;
+  padding: 1.7rem 1.55rem 1.45rem;
+  transform: rotateY(180deg);
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 28%),
+    linear-gradient(180deg, rgba(16, 16, 19, 0.98), rgba(9, 9, 11, 0.95));
+}
+
+.projectCard:hover .cardFaceFront,
+.projectCard:hover .cardFaceBack {
+  box-shadow: var(--shadow-md);
 }
 
 .cardVisual {
-  height: 55%;
+  height: 56%;
   width: 100%;
-  background: linear-gradient(135deg, #1a1a1a 0%, #050505 100%);
+  background: linear-gradient(135deg, rgba(18, 18, 20, 0.92) 0%, rgba(8, 8, 10, 0.98) 100%);
   position: relative;
   overflow: hidden;
+  padding: 1.35rem;
+}
+
+.visualBackdrop {
+  position: absolute;
+  inset: 0;
+  opacity: 0.8;
+}
+
+.accent1 .visualBackdrop {
+  background:
+    radial-gradient(circle at 25% 25%, rgba(245, 158, 11, 0.18), transparent 30%),
+    radial-gradient(circle at 80% 78%, rgba(96, 165, 250, 0.18), transparent 34%);
+}
+
+.accent2 .visualBackdrop {
+  background:
+    radial-gradient(circle at 20% 28%, rgba(167, 139, 250, 0.18), transparent 30%),
+    radial-gradient(circle at 78% 80%, rgba(45, 212, 191, 0.16), transparent 35%);
+}
+
+.accent3 .visualBackdrop {
+  background:
+    radial-gradient(circle at 22% 24%, rgba(248, 113, 113, 0.18), transparent 30%),
+    radial-gradient(circle at 74% 78%, rgba(250, 204, 21, 0.14), transparent 34%);
+}
+
+.accent4 .visualBackdrop {
+  background:
+    radial-gradient(circle at 26% 22%, rgba(52, 211, 153, 0.16), transparent 28%),
+    radial-gradient(circle at 76% 76%, rgba(59, 130, 246, 0.18), transparent 34%);
 }
 
 .imageOverlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(255, 255, 255, 0.02) 100%);
+  background: linear-gradient(to bottom, transparent 30%, rgba(255, 255, 255, 0.03) 100%);
   z-index: 1;
+}
+
+.previewFrame {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  border-radius: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0.01));
+  padding: 1.25rem 1.25rem 1.15rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.previewTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.previewYear,
+.previewStatus {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.9rem;
+  padding: 0.32rem 0.72rem;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.previewYear {
+  color: rgba(248, 250, 252, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.previewStatus {
+  color: rgba(15, 23, 42, 0.9);
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.previewCenter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  padding: 0.75rem 0 0.45rem;
+}
+
+.previewIconWrap {
+  width: 5.5rem;
+  height: 5.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.previewIcon {
+  font-size: 3.8rem;
+  line-height: 1;
+  display: inline-block;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.25));
+}
+
+.previewCopy {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding-top: 0.15rem;
+}
+
+.previewLabel {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(203, 213, 225, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.previewTitle {
+  font-size: clamp(1.25rem, 2vw, 1.85rem);
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  max-width: 13rem;
+  text-wrap: balance;
+}
+
+.previewBottomRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.previewTag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.85rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: rgba(226, 232, 240, 0.8);
 }
 
 .hoverOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
+  background: rgba(5, 5, 7, 0.52);
+  backdrop-filter: blur(12px);
   z-index: 5;
   display: flex;
   align-items: center;
@@ -113,90 +304,111 @@
 }
 
 .viewInfo {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  color: #fff;
-  letter-spacing: 0.05em;
+  color: #f8fafc;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.cardBrand {
-  position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  z-index: 10;
-}
-
-.cardIcon {
-  font-size: 1.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .cardBadge {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
+  color: #f8fafc;
+  background: rgba(10, 10, 12, 0.72);
+  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-pill);
   backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .cardInfo {
-  padding: 2rem;
+  padding: 1.75rem 1.65rem 1.6rem;
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   background: transparent;
+  min-height: 255px;
+}
+
+.cardMetaRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+  min-height: 2.6rem;
+}
+
+.cardYear {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.infoTop {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 166px;
 }
 
 .cardTitle {
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.01em;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
 .cardDescription {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  height: 6rem; /* Ensures consistent height even if text is shorter */
+  min-height: 6.1rem;
+  max-height: 6.1rem;
 }
 
 .cardFooter {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
+  gap: 1rem;
   margin-top: auto;
+  padding-top: 1.1rem;
+  min-height: 4.8rem;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  max-width: 75%;
+  max-width: 78%;
+  align-content: flex-start;
+  min-height: 4.4rem;
 }
 
 .tag {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-family: var(--font-mono);
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.05);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  border: 1px solid rgba(255,255,255,0.03);
+  color: rgba(226, 232, 240, 0.78);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.34rem 0.65rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255,255,255,0.05);
 }
 
 .actionButton {
@@ -206,22 +418,143 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
   cursor: pointer;
   flex-shrink: 0;
-  margin-left: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.actionButton:hover {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: rgba(96, 165, 250, 0.24);
+}
+
+.backHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+
+.backEyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.95rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.backYear {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.backMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-height: 176px;
+}
+
+.backTitle {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.backDescription {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.backStack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: auto;
+  min-height: 108px;
+  align-content: flex-start;
+}
+
+.backTag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.95rem;
+  padding: 0.36rem 0.68rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.3;
+}
+
+.backFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+  min-height: 2.9rem;
+}
+
+.previewLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.55rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: var(--radius-pill);
+  background: rgba(248, 250, 252, 0.92);
+  color: #111827;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.previewLinkDisabled {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.55rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: var(--muted);
+  font-size: 0.76rem;
 }
 
 .highlightCard {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .startupRibbon {
   position: absolute;
   top: 1.5rem;
   right: -2rem;
-  background: #fff;
-  color: #000;
+  background: linear-gradient(135deg, #f8fafc, #dbeafe);
+  color: #0f172a;
   font-size: 0.6rem;
   font-weight: 800;
   padding: 0.2rem 2rem;
@@ -231,17 +564,21 @@
 
 @media (max-width: 1024px) {
   .header {
-    padding: 0 2rem;
+    padding: 0 1rem;
   }
   .mainHeading {
     font-size: 2rem;
   }
   .carouselWrapper {
-    padding-left: 2rem;
+    padding-left: 1rem;
   }
   .projectCard {
     min-width: 360px;
-    height: 500px;
+    height: 540px;
+  }
+
+  .backMain {
+    min-height: 156px;
   }
 }
 
@@ -249,8 +586,111 @@
   .header {
     flex-direction: column;
     gap: 1.5rem;
+    margin-bottom: var(--space-8);
   }
   .navButtons {
     display: none;
+  }
+
+  .projectCard {
+    min-width: min(88vw, 360px);
+    height: 520px;
+  }
+
+  .previewIcon {
+    font-size: 2.9rem;
+  }
+
+  .previewIconWrap {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+
+  .previewFrame {
+    padding: 1rem;
+  }
+
+  .previewCenter {
+    padding: 0.65rem 0 0.4rem;
+  }
+
+  .cardFaceBack {
+    padding: 1.35rem 1.2rem 1.2rem;
+  }
+
+  .backMain {
+    min-height: 150px;
+  }
+
+  .backStack {
+    min-height: 96px;
+  }
+}
+
+@media (max-width: 420px) {
+  .scrollContainer {
+    gap: 1rem;
+    padding-bottom: 2rem;
+  }
+
+  .projectCard {
+    min-width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+    height: 520px;
+  }
+
+  .cardInfo {
+    padding: 1.3rem 1.2rem 1.2rem;
+    min-height: 270px;
+  }
+
+  .previewFrame {
+    padding: 1rem;
+  }
+
+  .previewCopy {
+    padding-top: 0.05rem;
+  }
+
+  .cardMetaRow {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.55rem;
+    min-height: 4.15rem;
+  }
+
+  .previewIcon {
+    font-size: 2.2rem;
+  }
+
+  .previewIconWrap {
+    width: 3.8rem;
+    height: 3.8rem;
+  }
+
+  .previewTopRow {
+    gap: 0.45rem;
+  }
+
+  .previewYear,
+  .previewStatus {
+    min-height: 1.75rem;
+    padding: 0.28rem 0.58rem;
+    font-size: 0.62rem;
+  }
+
+  .cardFaceBack {
+    padding: 1.15rem 1rem 1rem;
+  }
+
+  .backFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .previewLink,
+  .previewLinkDisabled {
+    width: 100%;
+    justify-content: center;
   }
 }

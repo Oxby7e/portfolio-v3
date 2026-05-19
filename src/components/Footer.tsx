@@ -45,14 +45,14 @@ export default function Footer({ id }: { id?: string }) {
   return (
     <footer className={styles.footer} id={id}>
       <div className={styles.contactWrapper}>
-        <motion.div 
+        <motion.h2
           className={styles.pill}
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
           Contact
-        </motion.div>
+        </motion.h2>
         
         <motion.p 
           className={styles.description}
@@ -123,6 +123,7 @@ export default function Footer({ id }: { id?: string }) {
               whileHover={{ y: -5, backgroundColor: "rgba(255, 255, 255, 0.2)" }}
               whileTap={{ scale: 0.95 }}
               aria-label={link.label}
+              title={link.label}
             >
               {link.icon}
             </motion.a>
