@@ -5,7 +5,7 @@ import styles from "./About.module.css";
 
 const languages = [
   { flag: "🇬🇧", name: "English", level: "Professional proficiency" },
-  { flag: "🇮🇳", name: "Konkani", level: "Native" },
+  { flag: "🇮🇳", name: "Kokani", level: "Native" },
   { flag: "🇮🇳", name: "Marathi", level: "Professional proficiency" },
   { flag: "🇮🇳", name: "Hindi", level: "Professional proficiency" },
 ];

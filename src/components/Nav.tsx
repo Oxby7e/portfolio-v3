@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styles from "./Nav.module.css";
 import Link from "next/link";
 import { Download, Calendar } from "lucide-react";
@@ -16,6 +16,7 @@ const links = [
 
 export default function Nav() {
   const [activeHref, setActiveHref] = useState(links[0]?.href ?? "#about");
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const sectionIds = links.map((link) => link.href.slice(1));
@@ -27,44 +28,66 @@ export default function Nav() {
       return;
     }
 
-    const syncFromHash = () => {
-      if (window.location.hash && links.some((link) => link.href === window.location.hash)) {
-        setActiveHref(window.location.hash);
-      }
+    const getFocusLine = () => {
+      const navBottom = navRef.current?.getBoundingClientRect().bottom ?? 0;
+      return navBottom + Math.min(window.innerHeight * 0.18, 120);
     };
 
-    syncFromHash();
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-
-        const topEntry = visibleEntries[0];
-        if (!topEntry?.target.id) {
-          return;
+    const syncActiveSection = () => {
+      if (window.location.hash && links.some((link) => link.href === window.location.hash)) {
+        const hashTarget = document.getElementById(window.location.hash.slice(1));
+        if (hashTarget) {
+          const rect = hashTarget.getBoundingClientRect();
+          if (rect.top <= getFocusLine() && rect.bottom >= 0) {
+            setActiveHref(window.location.hash);
+            return;
+          }
         }
-
-        setActiveHref(`#${topEntry.target.id}`);
-      },
-      {
-        rootMargin: "-24% 0px -52% 0px",
-        threshold: [0.2, 0.35, 0.5, 0.7],
       }
-    );
 
-    sections.forEach((section) => observer.observe(section));
-    window.addEventListener("hashchange", syncFromHash);
+      const focusLine = getFocusLine();
+      let currentSection = sections[0];
+
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= focusLine) {
+          currentSection = section;
+        }
+      });
+
+      setActiveHref(`#${currentSection.id}`);
+    };
+
+    let frameId = 0;
+    const scheduleSync = () => {
+      if (frameId) {
+        return;
+      }
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = 0;
+        syncActiveSection();
+      });
+    };
+
+    syncActiveSection();
+
+    window.addEventListener("scroll", scheduleSync, { passive: true });
+    window.addEventListener("resize", scheduleSync);
+    window.addEventListener("hashchange", scheduleSync);
 
     return () => {
-      observer.disconnect();
-      window.removeEventListener("hashchange", syncFromHash);
+      if (frameId) {
+        window.cancelAnimationFrame(frameId);
+      }
+
+      window.removeEventListener("scroll", scheduleSync);
+      window.removeEventListener("resize", scheduleSync);
+      window.removeEventListener("hashchange", scheduleSync);
     };
   }, []);
 
   return (
-    <nav className={styles.nav}>
+    <nav ref={navRef} className={styles.nav}>
       <div className={styles.container}>
         <ul className={styles.list}>
           {links.map((link) => (
