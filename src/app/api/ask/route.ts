@@ -1,15 +1,35 @@
-import OpenAI, { APIError } from "openai";
+import {
+  createOpencode,
+  type ApiError as OpencodeApiError,
+  type AssistantMessage,
+  type Part,
+  type ProviderAuthError,
+} from "@opencode-ai/sdk";
 import { portfolioContext } from "@/lib/portfolio-context";
 
 export const runtime = "nodejs";
 
-const RATE_LIMIT_MAX_REQUESTS = Number(process.env.OPENAI_RATE_LIMIT_MAX_REQUESTS ?? 5);
-const RATE_LIMIT_WINDOW_MS = Number(process.env.OPENAI_RATE_LIMIT_WINDOW_MS ?? 60_000);
+const RATE_LIMIT_MAX_REQUESTS = Number(
+  process.env.OPENCODE_RATE_LIMIT_MAX_REQUESTS ?? 3,
+);
+const RATE_LIMIT_WINDOW_MS = Number(
+  process.env.OPENCODE_RATE_LIMIT_WINDOW_MS ?? 60_000,
+);
+const DEFAULT_PROVIDER_ID = "opencode-go";
+const DEFAULT_MODEL = "opencode-go/deepseek-v4-flash";
 
 type RateLimitEntry = {
   count: number;
   windowStartedAt: number;
 };
+
+type ConfiguredModel = {
+  providerID: string;
+  modelID: string;
+  fullID: string;
+};
+
+type AssistantError = AssistantMessage["error"];
 
 const rateLimitStore = globalThis as typeof globalThis & {
   portfolioAssistantRateLimit?: Map<string, RateLimitEntry>;
@@ -32,8 +52,35 @@ Do not invent dates, employers, links, credentials, or project details.
 When useful, mention relevant project names or skills from the context.
 `.trim();
 
+function getConfiguredApiKey() {
+  return process.env.OPENCODE_API_KEY;
+}
+
 function isConfiguredApiKey(apiKey: string | undefined) {
-  return Boolean(apiKey && apiKey !== "your_openai_api_key_here");
+  return Boolean(apiKey && apiKey !== "your_opencode_api_key_here");
+}
+
+function getConfiguredModel(): ConfiguredModel {
+  const rawModel = process.env.OPENCODE_MODEL?.trim() || DEFAULT_MODEL;
+
+  if (rawModel.includes("/")) {
+    const [providerID, ...modelParts] = rawModel.split("/");
+    const modelID = modelParts.join("/").trim();
+
+    if (providerID && modelID) {
+      return {
+        providerID,
+        modelID,
+        fullID: `${providerID}/${modelID}`,
+      };
+    }
+  }
+
+  return {
+    providerID: DEFAULT_PROVIDER_ID,
+    modelID: rawModel,
+    fullID: `${DEFAULT_PROVIDER_ID}/${rawModel}`,
+  };
 }
 
 function getClientIdentifier(request: Request) {
@@ -95,45 +142,79 @@ function checkRateLimit(request: Request) {
   return null;
 }
 
-function getOpenAIErrorResponse(error: APIError) {
-  if (error.code === "insufficient_quota") {
+function isProviderAuthError(error: AssistantError): error is ProviderAuthError {
+  return error?.name === "ProviderAuthError";
+}
+
+function isApiError(error: AssistantError): error is OpencodeApiError {
+  return error?.name === "APIError";
+}
+
+function getErrorText(error: OpencodeApiError) {
+  return [error.data.message, error.data.responseBody].filter(Boolean).join(" ").toLowerCase();
+}
+
+function getOpencodeErrorResponse(error: AssistantError) {
+  if (isProviderAuthError(error)) {
     return Response.json(
       {
         error:
-          "The portfolio assistant is unavailable because the configured OpenAI project has no remaining quota. Add billing or use an API key from a funded project.",
+          "The portfolio assistant is not configured with a valid provider API key.",
       },
       { status: 503 },
     );
   }
 
-  if (error.status === 401 || error.code === "invalid_api_key") {
-    return Response.json(
-      {
-        error:
-          "The portfolio assistant is not configured with a valid OpenAI API key.",
-      },
-      { status: 503 },
-    );
-  }
+  if (isApiError(error)) {
+    const errorText = getErrorText(error);
 
-  if (error.code === "model_not_found") {
-    return Response.json(
-      {
-        error:
-          "The configured OpenAI model is unavailable. Update OPENAI_MODEL to a model your project can access.",
-      },
-      { status: 503 },
-    );
-  }
+    if (
+      error.data.statusCode === 401 ||
+      errorText.includes("invalid_api_key") ||
+      errorText.includes("incorrect api key")
+    ) {
+      return Response.json(
+        {
+          error:
+            "The portfolio assistant is not configured with a valid provider API key.",
+        },
+        { status: 503 },
+      );
+    }
 
-  if (error.status === 429) {
-    return Response.json(
-      {
-        error:
-          "The portfolio assistant is temporarily rate-limited. Please try again in a moment.",
-      },
-      { status: 429 },
-    );
+    if (errorText.includes("insufficient_quota") || errorText.includes("quota")) {
+      return Response.json(
+        {
+          error:
+            "The portfolio assistant is unavailable because the configured provider has no remaining quota.",
+        },
+        { status: 503 },
+      );
+    }
+
+    if (
+      errorText.includes("model_not_found") ||
+      errorText.includes("model not found") ||
+      errorText.includes("unknown model")
+    ) {
+      return Response.json(
+        {
+          error:
+            "The configured model is unavailable. Update OPENCODE_MODEL to a supported OpenCode Go model id.",
+        },
+        { status: 503 },
+      );
+    }
+
+    if (error.data.statusCode === 429) {
+      return Response.json(
+        {
+          error:
+            "The portfolio assistant is temporarily rate-limited. Please try again in a moment.",
+        },
+        { status: 429 },
+      );
+    }
   }
 
   return Response.json(
@@ -142,14 +223,25 @@ function getOpenAIErrorResponse(error: APIError) {
   );
 }
 
+function extractAnswer(parts: Part[]) {
+  return parts
+    .filter(
+      (part): part is Extract<Part, { type: "text" }> => part.type === "text" && !part.ignored,
+    )
+    .map((part) => part.text.trim())
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
+}
+
 export async function POST(request: Request) {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = getConfiguredApiKey();
 
   if (!isConfiguredApiKey(apiKey)) {
     return Response.json(
       {
         error:
-          "OpenAI is not configured yet. Add OPENAI_API_KEY to your environment to enable portfolio answers.",
+          "OpenCode is not configured yet. Add your OpenCode Go API key to OPENCODE_API_KEY to enable portfolio answers.",
       },
       { status: 503 },
     );
@@ -188,40 +280,80 @@ export async function POST(request: Request) {
     );
   }
 
+  const configuredModel = getConfiguredModel();
+  const opencode = await createOpencode({
+    config: {
+      model: configuredModel.fullID,
+      provider: {
+        [configuredModel.providerID]: {
+          options: {
+            apiKey,
+          },
+        },
+      },
+    },
+  });
+
   try {
-    const client = new OpenAI({ apiKey });
-    const response = await client.responses.create({
-      model: process.env.OPENAI_MODEL ?? "gpt-5.2",
-      instructions,
-      input: [
-        {
-          role: "user",
-          content: [
+    const sessionResult = await opencode.client.session.create({
+      body: {
+        title: "Portfolio assistant",
+      },
+    });
+    const session = sessionResult.data;
+
+    if (sessionResult.error || !session) {
+      throw new Error("Failed to create a temporary OpenCode session.");
+    }
+
+    try {
+      const promptResult = await opencode.client.session.prompt({
+        path: { id: session.id },
+        body: {
+          system: instructions,
+          model: {
+            providerID: configuredModel.providerID,
+            modelID: configuredModel.modelID,
+          },
+          parts: [
             {
-              type: "input_text",
+              type: "text",
               text: `Portfolio context:\n${portfolioContext}\n\nVisitor question:\n${question}`,
             },
           ],
         },
-      ],
-      max_output_tokens: 350,
-    });
+      });
+      const response = promptResult.data;
 
-    return Response.json({
-      answer:
-        response.output_text?.trim() ||
-        "I could not generate an answer from the portfolio context.",
-    });
-  } catch (error) {
-    console.error("OpenAI portfolio assistant error:", error);
+      if (promptResult.error || !response) {
+        throw new Error("Failed to generate a portfolio assistant response.");
+      }
 
-    if (error instanceof APIError) {
-      return getOpenAIErrorResponse(error);
+      if (response.info.error) {
+        console.error("OpenCode portfolio assistant error:", response.info.error);
+        return getOpencodeErrorResponse(response.info.error);
+      }
+
+      return Response.json({
+        answer:
+          extractAnswer(response.parts) ||
+          "I could not generate an answer from the portfolio context.",
+      });
+    } finally {
+      const deleteResult = await opencode.client.session.delete({ path: { id: session.id } });
+
+      if (deleteResult.error) {
+        console.warn("Failed to delete temporary OpenCode session for portfolio assistant.");
+      }
     }
+  } catch (error) {
+    console.error("OpenCode portfolio assistant error:", error);
 
     return Response.json(
       { error: "The portfolio assistant is unavailable right now." },
       { status: 500 },
     );
+  } finally {
+    opencode.server.close();
   }
 }

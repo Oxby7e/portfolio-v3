@@ -18,21 +18,33 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Portfolio Assistant
 
-The hero section can answer visitor questions using the OpenAI API from a
-server-side route.
+The hero section can answer visitor questions using an OpenCode SDK-backed
+server-side route. It is configured for OpenCode Go models.
 
 Create a local environment file and add:
 
 ```bash
-OPENAI_API_KEY="your_openai_api_key_here"
-OPENAI_MODEL="gpt-5.2"
-OPENAI_RATE_LIMIT_MAX_REQUESTS="5"
-OPENAI_RATE_LIMIT_WINDOW_MS="60000"
+OPENCODE_API_KEY="your_opencode_go_api_key_here"
+OPENCODE_MODEL="opencode-go/deepseek-v4-flash"
+OPENCODE_RATE_LIMIT_MAX_REQUESTS="5"
+OPENCODE_RATE_LIMIT_WINDOW_MS="60000"
 ```
 
-`OPENAI_MODEL` is optional. The app defaults to `gpt-5.2` when it is not set.
-The rate-limit variables are optional. By default, the assistant allows 5
-requests per client IP per 60 seconds.
+`OPENCODE_MODEL` is optional. The app defaults to `opencode-go/deepseek-v4-flash`
+when it is not set. Use the `provider/model` format so OpenCode can route the
+request correctly. The rate-limit variables are optional. By default, the
+assistant allows 5 requests per client IP per 60 seconds.
+
+Supported OpenCode Go model ids include:
+
+- `opencode-go/glm-5.1`
+- `opencode-go/kimi-k2.6`
+- `opencode-go/mimo-v2.5-pro`
+- `opencode-go/qwen3.6-plus`
+- `opencode-go/minimax-m2.7`
+- `opencode-go/deepseek-v4-pro`
+- `opencode-go/qwen3.5-plus`
+- `opencode-go/deepseek-v4-flash`
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

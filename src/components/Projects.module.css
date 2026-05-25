@@ -115,11 +115,132 @@
 .cardFaceBack {
   display: flex;
   flex-direction: column;
-  padding: 1.7rem 1.55rem 1.45rem;
+  padding: 0;
   transform: rotateY(180deg);
   background:
     radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 28%),
     linear-gradient(180deg, rgba(16, 16, 19, 0.98), rgba(9, 9, 11, 0.95));
+}
+
+.frontHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 1.75rem 1.65rem 0;
+  z-index: 2;
+}
+
+.frontCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 1rem 1.65rem;
+  text-align: center;
+  z-index: 2;
+}
+
+.frontIconWrap {
+  width: 6.5rem;
+  height: 6.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all var(--transition-normal) cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.frontIconWrap::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  padding: 1px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.projectCard:hover .frontIconWrap {
+  transform: scale(1.05);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.frontIcon {
+  font-size: 3.2rem;
+  line-height: 1;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+}
+
+.frontTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.frontFooter {
+  padding: 0 1.65rem 2.25rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  z-index: 2;
+}
+
+.frontTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.frontBackdrop {
+  position: absolute;
+  inset: 0;
+  opacity: 0.85;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.accent1 .frontBackdrop {
+  background: radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.12), transparent 60%);
+}
+
+.accent2 .frontBackdrop {
+  background: radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.12), transparent 60%);
+}
+
+.accent3 .frontBackdrop {
+  background: radial-gradient(circle at 50% 50%, rgba(248, 113, 113, 0.12), transparent 60%);
+}
+
+.accent4 .frontBackdrop {
+  background: radial-gradient(circle at 50% 50%, rgba(52, 211, 153, 0.12), transparent 60%);
+}
+
+.backInfo {
+  padding: 1.5rem 1.55rem 1.45rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .projectCard:hover .cardFaceFront,
@@ -615,7 +736,37 @@
   }
 
   .cardFaceBack {
-    padding: 1.35rem 1.2rem 1.2rem;
+    padding: 0;
+  }
+
+  .backInfo {
+    padding: 1.25rem 1.2rem 1.2rem;
+  }
+
+  .frontIconWrap {
+    width: 5rem;
+    height: 5rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .frontIcon {
+    font-size: 2.5rem;
+  }
+
+  .frontTitle {
+    font-size: 1.45rem;
+  }
+
+  .frontHeader {
+    padding: 1.25rem 1.2rem 0;
+  }
+
+  .frontCenter {
+    padding: 0.8rem 1.2rem;
+  }
+
+  .frontFooter {
+    padding: 0 1.2rem 1.75rem;
   }
 
   .backMain {
@@ -680,7 +831,37 @@
   }
 
   .cardFaceBack {
+    padding: 0;
+  }
+
+  .backInfo {
     padding: 1.15rem 1rem 1rem;
+  }
+
+  .frontIconWrap {
+    width: 4.2rem;
+    height: 4.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .frontIcon {
+    font-size: 2.1rem;
+  }
+
+  .frontTitle {
+    font-size: 1.3rem;
+  }
+
+  .frontHeader {
+    padding: 1.15rem 1rem 0;
+  }
+
+  .frontCenter {
+    padding: 0.6rem 1rem;
+  }
+
+  .frontFooter {
+    padding: 0 1rem 1.5rem;
   }
 
   .backFooter {
