@@ -34,9 +34,9 @@ export default function Footer({ id }: { id?: string }) {
   const lastUpdated = "12 May 2026";
   
   const socialLinks = [
-    { icon: <LinkedInIcon />, href: "https://linkedin.com/in/ayanmodak", label: "LinkedIn" },
-    { icon: <GithubIcon />, href: "https://github.com/ayanmodak", label: "GitHub" },
-    { icon: <StackOverflowIcon />, href: "https://stackoverflow.com/users/ayanmodak", label: "Stack Overflow" },
+    { icon: <LinkedInIcon />, href: "https://www.linkedin.com/in/ayan-modak/", label: "LinkedIn" },
+    { icon: <GithubIcon />, href: "https://github.com/Oxby7e", label: "GitHub" },
+    { icon: <StackOverflowIcon />, href: "https://stackoverflow.com/users/16305131/ayan-modak", label: "Stack Overflow" },
     { icon: <XIcon />, href: "https://x.com/ayanmodak", label: "X" },
     { icon: <ProductHuntIcon />, href: "https://www.producthunt.com/@ayanmodak", label: "Product Hunt" },
     { icon: <Mail size={22} />, href: "mailto:modakaryan11@gmail.com", label: "Email" },
