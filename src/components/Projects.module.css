@@ -110,6 +110,9 @@
 .cardFaceFront {
   display: flex;
   flex-direction: column;
+  z-index: 2;
+  pointer-events: auto;
+  transition: z-index var(--transition-standard), pointer-events var(--transition-standard);
 }
 
 .cardFaceBack {
@@ -120,6 +123,20 @@
   background:
     radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 28%),
     linear-gradient(180deg, rgba(16, 16, 19, 0.98), rgba(9, 9, 11, 0.95));
+  z-index: 1;
+  pointer-events: none;
+  transition: z-index var(--transition-standard), pointer-events var(--transition-standard);
+}
+
+/* Dynamically adjust z-index and pointer-events on hover to ensure the active face is clickable */
+.projectCard:hover .cardFaceFront {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.projectCard:hover .cardFaceBack {
+  z-index: 2;
+  pointer-events: auto;
 }
 
 .frontHeader {
@@ -155,7 +172,7 @@
   box-shadow: 
     0 15px 35px rgba(0, 0, 0, 0.35),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: all var(--transition-normal) cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--transition-standard) cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
 
