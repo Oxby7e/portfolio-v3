@@ -159,7 +159,7 @@ function getOpencodeErrorResponse(error: AssistantError) {
     return Response.json(
       {
         error:
-          "The portfolio assistant is not configured with a valid provider API key.",
+          "The portfolio assistant is unavailable because the configured provider has no remaining quota.",
       },
       { status: 503 },
     );
@@ -176,7 +176,7 @@ function getOpencodeErrorResponse(error: AssistantError) {
       return Response.json(
         {
           error:
-            "The portfolio assistant is not configured with a valid provider API key.",
+            "The portfolio assistant is unavailable because the configured provider has no remaining quota.",
         },
         { status: 503 },
       );

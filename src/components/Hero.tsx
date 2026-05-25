@@ -61,10 +61,23 @@ export default function Hero() {
         body: JSON.stringify({ question }),
       });
 
-      const data = (await response.json()) as {
-        answer?: string;
-        error?: string;
-      };
+      let data: { answer?: string; error?: string } = {};
+      const contentType = response.headers.get("content-type");
+      
+      if (contentType && contentType.includes("application/json")) {
+        try {
+          data = await response.json();
+        } catch (e) {
+          console.error("Failed to parse JSON response:", e);
+        }
+      } else {
+        try {
+          const text = await response.text();
+          console.warn("Non-JSON response received:", text);
+        } catch {
+          // Ignore text parsing errors if body is empty or locked
+        }
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "The portfolio assistant is unavailable.");
