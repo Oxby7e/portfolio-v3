@@ -110,7 +110,7 @@ export default function Nav() {
             <span>Meet</span>
           </a>
 
-          <a href="/Ayan Modak.pdf" download="Ayan Modak Resume" className={styles.resumeBtn}>
+          <a href="/Ayan_Modak.pdf" download="Ayan_Modak.pdf" className={styles.resumeBtn}>
             <Download size={16} />
             <span>Resume</span>
           </a>
