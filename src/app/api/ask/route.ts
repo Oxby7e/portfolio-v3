@@ -17,6 +17,7 @@ const RATE_LIMIT_WINDOW_MS = Number(
 );
 const DEFAULT_PROVIDER_ID = "opencode-go";
 const DEFAULT_MODEL = "opencode-go/deepseek-v4-flash";
+const LOCAL_BIN_DIR = `${process.cwd()}/bin`;
 
 type RateLimitEntry = {
   count: number;
@@ -55,6 +56,15 @@ When useful, mention relevant project names or skills from the context.
 
 function getConfiguredApiKey() {
   return process.env.OPENCODE_API_KEY;
+}
+
+function ensureOpencodeBinaryOnPath() {
+  const existingPath = process.env.PATH ?? "";
+  const pathEntries = existingPath.split(":").filter(Boolean);
+
+  if (!pathEntries.includes(LOCAL_BIN_DIR)) {
+    process.env.PATH = [LOCAL_BIN_DIR, ...pathEntries].join(":");
+  }
 }
 
 function isConfiguredApiKey(apiKey: string | undefined) {
@@ -314,6 +324,8 @@ export async function POST(request: Request) {
   const configuredModel = getConfiguredModel();
   let opencode: Awaited<ReturnType<typeof createOpencode>> | null = null;
   try {
+    ensureOpencodeBinaryOnPath();
+
     opencode = await createOpencode({
       config: {
         model: configuredModel.fullID,
