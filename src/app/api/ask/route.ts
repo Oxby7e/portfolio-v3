@@ -30,6 +30,7 @@ type ConfiguredModel = {
 };
 
 type AssistantError = AssistantMessage["error"];
+type RuntimeError = NodeJS.ErrnoException & { path?: string };
 
 const rateLimitStore = globalThis as typeof globalThis & {
   portfolioAssistantRateLimit?: Map<string, RateLimitEntry>;
@@ -223,6 +224,36 @@ function getOpencodeErrorResponse(error: AssistantError) {
   );
 }
 
+function isRuntimeError(error: unknown): error is RuntimeError {
+  return error instanceof Error;
+}
+
+function isMissingOpencodeBinaryError(error: unknown) {
+  return (
+    isRuntimeError(error) &&
+    error.code === "ENOENT" &&
+    typeof error.path === "string" &&
+    error.path.includes("opencode")
+  );
+}
+
+function getUnexpectedRuntimeErrorResponse(error: unknown) {
+  if (isMissingOpencodeBinaryError(error)) {
+    return Response.json(
+      {
+        error:
+          "The portfolio assistant is not available in this deployment because the OpenCode CLI binary is missing on the server.",
+      },
+      { status: 503 },
+    );
+  }
+
+  return Response.json(
+    { error: "The portfolio assistant is unavailable right now." },
+    { status: 500 },
+  );
+}
+
 function extractAnswer(parts: Part[]) {
   return parts
     .filter(
@@ -281,20 +312,21 @@ export async function POST(request: Request) {
   }
 
   const configuredModel = getConfiguredModel();
-  const opencode = await createOpencode({
-    config: {
-      model: configuredModel.fullID,
-      provider: {
-        [configuredModel.providerID]: {
-          options: {
-            apiKey,
+  let opencode: Awaited<ReturnType<typeof createOpencode>> | null = null;
+  try {
+    opencode = await createOpencode({
+      config: {
+        model: configuredModel.fullID,
+        provider: {
+          [configuredModel.providerID]: {
+            options: {
+              apiKey,
+            },
           },
         },
       },
-    },
-  });
+    });
 
-  try {
     const sessionResult = await opencode.client.session.create({
       body: {
         title: "Portfolio assistant",
@@ -348,12 +380,8 @@ export async function POST(request: Request) {
     }
   } catch (error) {
     console.error("OpenCode portfolio assistant error:", error);
-
-    return Response.json(
-      { error: "The portfolio assistant is unavailable right now." },
-      { status: 500 },
-    );
+    return getUnexpectedRuntimeErrorResponse(error);
   } finally {
-    opencode.server.close();
+    opencode?.server.close();
   }
 }
