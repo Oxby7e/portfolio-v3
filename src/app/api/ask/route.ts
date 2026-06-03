@@ -184,10 +184,6 @@ function getOpenCodeGoEndpoint(modelID: string) {
   return CHAT_COMPLETIONS_ENDPOINT;
 }
 
-function getAlternateEndpoint(endpoint: string) {
-  return endpoint === CHAT_COMPLETIONS_ENDPOINT ? MESSAGES_ENDPOINT : CHAT_COMPLETIONS_ENDPOINT;
-}
-
 function collectTextParts(value: unknown): string[] {
   if (typeof value === "string") {
     const trimmed = value.trim();
@@ -271,10 +267,10 @@ function extractAnthropicCompatibleAnswer(data: AnthropicCompatibleResponse & Re
 
 function getProviderErrorResponse(status: number, errorText: string) {
   if (
-    status === 401 ||
     errorText.includes("invalid_api_key") ||
+    errorText.includes("api key was rejected") ||
     errorText.includes("incorrect api key") ||
-    errorText.includes("unauthorized")
+    errorText.includes("invalid api key")
   ) {
     return Response.json(
       {
@@ -405,20 +401,14 @@ async function askOpenCodeGo(
     return primaryResult;
   }
 
-  const alternateEndpoint = getAlternateEndpoint(primaryEndpoint);
-  const alternateResult = await requestOpenCodeGo(apiKey, model, question, alternateEndpoint);
-
-  if ("errorResponse" in alternateResult || alternateResult.answer) {
-    return alternateResult;
-  }
-
-  console.warn("OpenCode Go returned an empty answer on both endpoints.", {
+  console.warn("OpenCode Go returned an empty answer on the configured endpoint.", {
     model: model.modelID,
     primaryEndpoint,
-    alternateEndpoint,
   });
 
-  return primaryResult;
+  return {
+    answer: "",
+  };
 }
 
 export async function POST(request: Request) {
