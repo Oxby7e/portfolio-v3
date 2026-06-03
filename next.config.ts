@@ -1,13 +1,5 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  outputFileTracingIncludes: {
-    "/api/ask": [
-      "./bin/opencode",
-      "./node_modules/opencode-ai/**/*",
-      "./node_modules/opencode-linux-*/**/*",
-    ],
-  },
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

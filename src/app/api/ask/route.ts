@@ -1,10 +1,3 @@
-import {
-  createOpencode,
-  type ApiError as OpencodeApiError,
-  type AssistantMessage,
-  type Part,
-  type ProviderAuthError,
-} from "@opencode-ai/sdk";
 import { portfolioContext } from "@/lib/portfolio-context";
 
 export const runtime = "nodejs";
@@ -17,7 +10,8 @@ const RATE_LIMIT_WINDOW_MS = Number(
 );
 const DEFAULT_PROVIDER_ID = "opencode-go";
 const DEFAULT_MODEL = "opencode-go/deepseek-v4-flash";
-const LOCAL_BIN_DIR = `${process.cwd()}/bin`;
+const CHAT_COMPLETIONS_ENDPOINT = "https://opencode.ai/zen/go/v1/chat/completions";
+const MESSAGES_ENDPOINT = "https://opencode.ai/zen/go/v1/messages";
 
 type RateLimitEntry = {
   count: number;
@@ -30,8 +24,42 @@ type ConfiguredModel = {
   fullID: string;
 };
 
-type AssistantError = AssistantMessage["error"];
-type RuntimeError = NodeJS.ErrnoException & { path?: string };
+type OpenAiCompatibleResponse = {
+  choices?: Array<{
+    message?: {
+      content?:
+        | string
+        | Array<{
+            type?: string;
+            text?: string;
+          }>;
+    };
+  }>;
+  error?: {
+    message?: string;
+    type?: string;
+    code?: string;
+  };
+};
+
+type AnthropicCompatibleResponse = {
+  content?: Array<{
+    type?: string;
+    text?: string;
+  }>;
+  error?: {
+    message?: string;
+    type?: string;
+  };
+};
+
+type AskOpenCodeGoResult =
+  | {
+      answer: string;
+    }
+  | {
+      errorResponse: Response;
+    };
 
 const rateLimitStore = globalThis as typeof globalThis & {
   portfolioAssistantRateLimit?: Map<string, RateLimitEntry>;
@@ -56,15 +84,6 @@ When useful, mention relevant project names or skills from the context.
 
 function getConfiguredApiKey() {
   return process.env.OPENCODE_API_KEY;
-}
-
-function ensureOpencodeBinaryOnPath() {
-  const existingPath = process.env.PATH ?? "";
-  const pathEntries = existingPath.split(":").filter(Boolean);
-
-  if (!pathEntries.includes(LOCAL_BIN_DIR)) {
-    process.env.PATH = [LOCAL_BIN_DIR, ...pathEntries].join(":");
-  }
 }
 
 function isConfiguredApiKey(apiKey: string | undefined) {
@@ -153,20 +172,120 @@ function checkRateLimit(request: Request) {
   return null;
 }
 
-function isProviderAuthError(error: AssistantError): error is ProviderAuthError {
-  return error?.name === "ProviderAuthError";
+function getErrorText(error: { message?: string; type?: string; code?: string } | undefined) {
+  return [error?.message, error?.type, error?.code].filter(Boolean).join(" ").toLowerCase();
 }
 
-function isApiError(error: AssistantError): error is OpencodeApiError {
-  return error?.name === "APIError";
+function getOpenCodeGoEndpoint(modelID: string) {
+  if (modelID.startsWith("minimax-")) {
+    return MESSAGES_ENDPOINT;
+  }
+
+  return CHAT_COMPLETIONS_ENDPOINT;
 }
 
-function getErrorText(error: OpencodeApiError) {
-  return [error.data.message, error.data.responseBody].filter(Boolean).join(" ").toLowerCase();
+function getAlternateEndpoint(endpoint: string) {
+  return endpoint === CHAT_COMPLETIONS_ENDPOINT ? MESSAGES_ENDPOINT : CHAT_COMPLETIONS_ENDPOINT;
 }
 
-function getOpencodeErrorResponse(error: AssistantError) {
-  if (isProviderAuthError(error)) {
+function collectTextParts(value: unknown): string[] {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed ? [trimmed] : [];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectTextParts(item));
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const preferredKeys = [
+      "text",
+      "value",
+      "content",
+      "message",
+      "output_text",
+      "output",
+      "response",
+    ];
+
+    for (const key of preferredKeys) {
+      if (key in record) {
+        const parts = collectTextParts(record[key]);
+
+        if (parts.length > 0) {
+          return parts;
+        }
+      }
+    }
+  }
+
+  return [];
+}
+
+function extractOpenAiCompatibleAnswer(data: OpenAiCompatibleResponse & Record<string, unknown>) {
+  const content = data.choices?.[0]?.message?.content;
+
+  if (typeof content === "string") {
+    return content.trim();
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .filter((part) => part.type === "text" && typeof part.text === "string")
+      .map((part) => part.text!.trim())
+      .filter(Boolean)
+      .join("\n\n")
+      .trim();
+  }
+
+  const fallbackParts = collectTextParts(
+    data.choices?.[0] ?? data.output_text ?? data.output ?? data.response ?? data,
+  );
+
+  if (fallbackParts.length > 0) {
+    return fallbackParts.join("\n\n").trim();
+  }
+
+  return "";
+}
+
+function extractAnthropicCompatibleAnswer(data: AnthropicCompatibleResponse & Record<string, unknown>) {
+  const answer =
+    data.content
+      ?.filter((part) => part.type === "text" && typeof part.text === "string")
+      .map((part) => part.text!.trim())
+      .filter(Boolean)
+      .join("\n\n")
+      .trim() ?? "";
+
+  if (answer) {
+    return answer;
+  }
+
+  const fallbackParts = collectTextParts(data.content ?? data.message ?? data.response ?? data);
+
+  return fallbackParts.join("\n\n").trim();
+}
+
+function getProviderErrorResponse(status: number, errorText: string) {
+  if (
+    status === 401 ||
+    errorText.includes("invalid_api_key") ||
+    errorText.includes("incorrect api key") ||
+    errorText.includes("unauthorized")
+  ) {
+    return Response.json(
+      {
+        error:
+          "The portfolio assistant is unavailable because the configured OpenCode Go API key was rejected.",
+      },
+      { status: 503 },
+    );
+  }
+
+  if (errorText.includes("insufficient_quota") || errorText.includes("quota")) {
     return Response.json(
       {
         error:
@@ -176,85 +295,27 @@ function getOpencodeErrorResponse(error: AssistantError) {
     );
   }
 
-  if (isApiError(error)) {
-    const errorText = getErrorText(error);
-
-    if (
-      error.data.statusCode === 401 ||
-      errorText.includes("invalid_api_key") ||
-      errorText.includes("incorrect api key")
-    ) {
-      return Response.json(
-        {
-          error:
-            "The portfolio assistant is unavailable because the configured provider has no remaining quota.",
-        },
-        { status: 503 },
-      );
-    }
-
-    if (errorText.includes("insufficient_quota") || errorText.includes("quota")) {
-      return Response.json(
-        {
-          error:
-            "The portfolio assistant is unavailable because the configured provider has no remaining quota.",
-        },
-        { status: 503 },
-      );
-    }
-
-    if (
-      errorText.includes("model_not_found") ||
-      errorText.includes("model not found") ||
-      errorText.includes("unknown model")
-    ) {
-      return Response.json(
-        {
-          error:
-            "The configured model is unavailable. Update OPENCODE_MODEL to a supported OpenCode Go model id.",
-        },
-        { status: 503 },
-      );
-    }
-
-    if (error.data.statusCode === 429) {
-      return Response.json(
-        {
-          error:
-            "The portfolio assistant is temporarily rate-limited. Please try again in a moment.",
-        },
-        { status: 429 },
-      );
-    }
-  }
-
-  return Response.json(
-    { error: "The portfolio assistant is unavailable right now." },
-    { status: 500 },
-  );
-}
-
-function isRuntimeError(error: unknown): error is RuntimeError {
-  return error instanceof Error;
-}
-
-function isMissingOpencodeBinaryError(error: unknown) {
-  return (
-    isRuntimeError(error) &&
-    error.code === "ENOENT" &&
-    typeof error.path === "string" &&
-    error.path.includes("opencode")
-  );
-}
-
-function getUnexpectedRuntimeErrorResponse(error: unknown) {
-  if (isMissingOpencodeBinaryError(error)) {
+  if (
+    errorText.includes("model_not_found") ||
+    errorText.includes("model not found") ||
+    errorText.includes("unknown model")
+  ) {
     return Response.json(
       {
         error:
-          "The portfolio assistant is not available in this deployment because the OpenCode CLI binary is missing on the server.",
+          "The configured model is unavailable. Update OPENCODE_MODEL to a supported OpenCode Go model id.",
       },
       { status: 503 },
+    );
+  }
+
+  if (status === 429) {
+    return Response.json(
+      {
+        error:
+          "The portfolio assistant is temporarily rate-limited. Please try again in a moment.",
+      },
+      { status: 429 },
     );
   }
 
@@ -264,15 +325,100 @@ function getUnexpectedRuntimeErrorResponse(error: unknown) {
   );
 }
 
-function extractAnswer(parts: Part[]) {
-  return parts
-    .filter(
-      (part): part is Extract<Part, { type: "text" }> => part.type === "text" && !part.ignored,
-    )
-    .map((part) => part.text.trim())
-    .filter(Boolean)
-    .join("\n\n")
-    .trim();
+async function requestOpenCodeGo(
+  apiKey: string,
+  model: ConfiguredModel,
+  question: string,
+  endpoint: string,
+) {
+  const isMessagesEndpoint = endpoint === MESSAGES_ENDPOINT;
+  const payload = isMessagesEndpoint
+    ? {
+        model: model.modelID,
+        system: instructions,
+        max_tokens: 500,
+        messages: [
+          {
+            role: "user",
+            content: `Portfolio context:\n${portfolioContext}\n\nVisitor question:\n${question}`,
+          },
+        ],
+      }
+    : {
+        model: model.modelID,
+        max_tokens: 500,
+        messages: [
+          {
+            role: "system",
+            content: instructions,
+          },
+          {
+            role: "user",
+            content: `Portfolio context:\n${portfolioContext}\n\nVisitor question:\n${question}`,
+          },
+        ],
+      };
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = (await response.json().catch(() => null)) as
+    | OpenAiCompatibleResponse
+    | AnthropicCompatibleResponse
+    | null;
+
+  if (!response.ok) {
+    const errorText =
+      data && "error" in data
+        ? getErrorText(data.error)
+        : `http ${response.status}`.toLowerCase();
+
+    return {
+      errorResponse: getProviderErrorResponse(response.status, errorText),
+    };
+  }
+
+  const answer = isMessagesEndpoint
+    ? extractAnthropicCompatibleAnswer(data as AnthropicCompatibleResponse & Record<string, unknown>)
+    : extractOpenAiCompatibleAnswer(data as OpenAiCompatibleResponse & Record<string, unknown>);
+
+  return {
+    answer,
+  };
+}
+
+async function askOpenCodeGo(
+  apiKey: string,
+  model: ConfiguredModel,
+  question: string,
+): Promise<AskOpenCodeGoResult> {
+  const primaryEndpoint = getOpenCodeGoEndpoint(model.modelID);
+  const primaryResult = await requestOpenCodeGo(apiKey, model, question, primaryEndpoint);
+
+  if ("errorResponse" in primaryResult || primaryResult.answer) {
+    return primaryResult;
+  }
+
+  const alternateEndpoint = getAlternateEndpoint(primaryEndpoint);
+  const alternateResult = await requestOpenCodeGo(apiKey, model, question, alternateEndpoint);
+
+  if ("errorResponse" in alternateResult || alternateResult.answer) {
+    return alternateResult;
+  }
+
+  console.warn("OpenCode Go returned an empty answer on both endpoints.", {
+    model: model.modelID,
+    primaryEndpoint,
+    alternateEndpoint,
+  });
+
+  return primaryResult;
 }
 
 export async function POST(request: Request) {
@@ -287,6 +433,8 @@ export async function POST(request: Request) {
       { status: 503 },
     );
   }
+
+  const configuredApiKey = apiKey as string;
 
   const rateLimitResponse = checkRateLimit(request);
 
@@ -322,78 +470,34 @@ export async function POST(request: Request) {
   }
 
   const configuredModel = getConfiguredModel();
-  let opencode: Awaited<ReturnType<typeof createOpencode>> | null = null;
+
+  if (configuredModel.providerID !== DEFAULT_PROVIDER_ID) {
+    return Response.json(
+      {
+        error:
+          "This deployment only supports OpenCode Go models. Set OPENCODE_MODEL to an opencode-go/* model id.",
+      },
+      { status: 503 },
+    );
+  }
+
   try {
-    ensureOpencodeBinaryOnPath();
+    const result = await askOpenCodeGo(configuredApiKey, configuredModel, question);
 
-    opencode = await createOpencode({
-      config: {
-        model: configuredModel.fullID,
-        provider: {
-          [configuredModel.providerID]: {
-            options: {
-              apiKey,
-            },
-          },
-        },
-      },
-    });
-
-    const sessionResult = await opencode.client.session.create({
-      body: {
-        title: "Portfolio assistant",
-      },
-    });
-    const session = sessionResult.data;
-
-    if (sessionResult.error || !session) {
-      throw new Error("Failed to create a temporary OpenCode session.");
+    if ("errorResponse" in result) {
+      return result.errorResponse;
     }
 
-    try {
-      const promptResult = await opencode.client.session.prompt({
-        path: { id: session.id },
-        body: {
-          system: instructions,
-          model: {
-            providerID: configuredModel.providerID,
-            modelID: configuredModel.modelID,
-          },
-          parts: [
-            {
-              type: "text",
-              text: `Portfolio context:\n${portfolioContext}\n\nVisitor question:\n${question}`,
-            },
-          ],
-        },
-      });
-      const response = promptResult.data;
-
-      if (promptResult.error || !response) {
-        throw new Error("Failed to generate a portfolio assistant response.");
-      }
-
-      if (response.info.error) {
-        console.error("OpenCode portfolio assistant error:", response.info.error);
-        return getOpencodeErrorResponse(response.info.error);
-      }
-
-      return Response.json({
-        answer:
-          extractAnswer(response.parts) ||
-          "I could not generate an answer from the portfolio context.",
-      });
-    } finally {
-      const deleteResult = await opencode.client.session.delete({ path: { id: session.id } });
-
-      if (deleteResult.error) {
-        console.warn("Failed to delete temporary OpenCode session for portfolio assistant.");
-      }
-    }
+    return Response.json({
+      answer:
+        result.answer || "I could not generate an answer from the portfolio context.",
+    });
   } catch (error) {
-    console.error("OpenCode portfolio assistant error:", error);
-    return getUnexpectedRuntimeErrorResponse(error);
-  } finally {
-    opencode?.server.close();
+    console.error("OpenCode Go portfolio assistant error:", error);
+
+    return Response.json(
+      { error: "The portfolio assistant is unavailable right now." },
+      { status: 500 },
+    );
   }
 }

@@ -20,10 +20,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 The hero section can answer visitor questions using an OpenCode SDK-backed
 server-side route. It is configured for OpenCode Go models.
-
-The deployment also bundles the `opencode` CLI binary because the SDK starts a
-local `opencode serve` process under the hood. Installing dependencies is
-therefore required in both local and deployed environments.
+The production route talks directly to the OpenCode Go HTTP API, so deployment
+only needs the environment variables and does not need the local OpenCode CLI.
 
 Create a local environment file and add:
 
